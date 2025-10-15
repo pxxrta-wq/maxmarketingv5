@@ -155,6 +155,12 @@ const Index = () => {
       <footer className="border-t border-border mt-20">
         <div className="container mx-auto px-6 py-8 text-center text-sm text-muted-foreground">
           <p>© 2024 Max Marketing. Tous droits réservés.</p>
+          <button
+            onClick={() => navigate("/privacy-policy")}
+            className="mt-2 text-primary hover:underline"
+          >
+            Politique de confidentialité
+          </button>
         </div>
       </footer>
     </div>

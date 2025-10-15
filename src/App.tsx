@@ -9,6 +9,10 @@ import Dashboard from "./pages/Dashboard";
 import EmailGenerator from "./pages/EmailGenerator";
 import PlanGenerator from "./pages/PlanGenerator";
 import SocialGenerator from "./pages/SocialGenerator";
+import PitchCreator from "./pages/PitchCreator";
+import AvatarCreator from "./pages/AvatarCreator";
+import Premium from "./pages/Premium";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -28,6 +32,10 @@ const App = () => (
           <Route path="/email-generator" element={<EmailGenerator />} />
           <Route path="/plan-generator" element={<PlanGenerator />} />
           <Route path="/social-generator" element={<SocialGenerator />} />
+          <Route path="/pitch-creator" element={<PitchCreator />} />
+          <Route path="/avatar-creator" element={<AvatarCreator />} />
+          <Route path="/premium" element={<Premium />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
