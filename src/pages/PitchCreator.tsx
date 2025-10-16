@@ -7,16 +7,20 @@ import { Card } from "@/components/ui/card";
 import { Sparkles, Copy, Download, Rocket } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useTracking } from "@/hooks/useTracking";
+import { typewriterEffect } from "@/utils/typewriter";
+import { usePremium } from "@/hooks/usePremium";
 
 export default function PitchCreator() {
+  const { trackAction } = useTracking();
+  const isPremium = usePremium();
   const [product, setProduct] = useState("");
   const [problem, setProblem] = useState("");
   const [market, setMarket] = useState("");
   const [traction, setTraction] = useState("");
   const [pitch, setPitch] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const isPremium = localStorage.getItem("max_premium") === "true";
+  const [isTyping, setIsTyping] = useState(false);
 
   const generatePitch = async () => {
     if (!isPremium) {
@@ -36,7 +40,14 @@ export default function PitchCreator() {
       });
 
       if (error) throw error;
-      setPitch(data.pitch);
+      
+      setIsTyping(true);
+      await typewriterEffect(data.pitch, (partial) => {
+        setPitch(partial);
+      }, 30);
+      setIsTyping(false);
+      
+      trackAction("pitch_created");
       toast.success("✨ Pitch généré avec succès !");
     } catch (error: any) {
       console.error("Erreur génération pitch:", error);

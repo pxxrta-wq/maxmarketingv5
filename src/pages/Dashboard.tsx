@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { typewriterEffect } from "@/utils/typewriter";
+import { useTracking } from "@/hooks/useTracking";
 
 interface Message {
   role: "user" | "assistant";
@@ -15,9 +17,11 @@ interface Message {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { trackAction } = useTracking();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,15 +62,37 @@ const Dashboard = () => {
 
       if (error) throw error;
 
+      // Ajouter le message assistant vide d'abord
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.response,
+        content: "",
         timestamp: new Date(),
       };
+      
+      const updatedMessages = [...messages, userMessage, assistantMessage];
+      setMessages(updatedMessages);
+      
+      // Effet typewriter
+      setIsTyping(true);
+      let currentContent = "";
+      await typewriterEffect(data.response, (partial) => {
+        currentContent = partial;
+        setMessages(prev => {
+          const newMsgs = [...prev];
+          newMsgs[newMsgs.length - 1] = {
+            ...newMsgs[newMsgs.length - 1],
+            content: partial
+          };
+          return newMsgs;
+        });
+      }, 30);
+      setIsTyping(false);
 
-      const newMessages = [...messages, userMessage, assistantMessage];
-      setMessages(newMessages);
-      localStorage.setItem("max_chat_history", JSON.stringify(newMessages));
+      // Sauvegarder dans localStorage
+      const finalMessages = [...messages, userMessage, { ...assistantMessage, content: currentContent }];
+      localStorage.setItem("max_chat_history", JSON.stringify(finalMessages));
+      
+      trackAction("chats_count");
     } catch (error: any) {
       console.error("Erreur:", error);
       toast.error("Erreur lors de la génération de la réponse");
@@ -101,13 +127,16 @@ const Dashboard = () => {
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-3xl rounded-2xl p-4 ${
+                   className={`max-w-3xl rounded-2xl p-4 ${
                     message.role === "user"
                       ? "gradient-primary text-white"
                       : "bg-card border border-border"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap leading-relaxed">
+                    {message.content}
+                    {index === messages.length - 1 && isTyping && <span className="animate-pulse">▊</span>}
+                  </p>
                 </div>
               </div>
             ))

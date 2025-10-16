@@ -7,15 +7,19 @@ import { Card } from "@/components/ui/card";
 import { Users, Copy, Download, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useTracking } from "@/hooks/useTracking";
+import { typewriterEffect } from "@/utils/typewriter";
+import { usePremium } from "@/hooks/usePremium";
 
 export default function AvatarCreator() {
+  const { trackAction } = useTracking();
+  const isPremium = usePremium();
   const [business, setBusiness] = useState("");
   const [product, setProduct] = useState("");
   const [goal, setGoal] = useState("");
   const [avatar, setAvatar] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const isPremium = localStorage.getItem("max_premium") === "true";
+  const [isTyping, setIsTyping] = useState(false);
 
   const generateAvatar = async () => {
     if (!isPremium) {
@@ -35,7 +39,14 @@ export default function AvatarCreator() {
       });
 
       if (error) throw error;
-      setAvatar(data.avatar);
+      
+      setIsTyping(true);
+      await typewriterEffect(data.avatar, (partial) => {
+        setAvatar(partial);
+      }, 30);
+      setIsTyping(false);
+      
+      trackAction("avatars_generated");
       toast.success("✨ Avatar client créé avec succès !");
     } catch (error: any) {
       console.error("Erreur génération avatar:", error);

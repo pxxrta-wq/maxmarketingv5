@@ -8,6 +8,7 @@ import { Loader2, Copy, CheckCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useTracking } from "@/hooks/useTracking";
 
 interface SocialContent {
   linkedin: string;
@@ -19,6 +20,7 @@ interface SocialContent {
 
 const SocialGenerator = () => {
   const navigate = useNavigate();
+  const { trackAction } = useTracking();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SocialContent | null>(null);
   const [topic, setTopic] = useState("");
@@ -57,6 +59,7 @@ const SocialGenerator = () => {
       });
       localStorage.setItem("max_social_history", JSON.stringify(history.slice(0, 50)));
       
+      trackAction("social_posts_generated");
       toast.success("Contenus générés avec succès !");
     } catch (error: any) {
       console.error("Erreur:", error);
@@ -161,8 +164,8 @@ const SocialGenerator = () => {
                           )}
                         </Button>
                       </div>
-                      <div className="prose prose-invert max-w-none">
-                        <pre className="whitespace-pre-wrap text-sm bg-secondary p-4 rounded-lg">
+                       <div className="prose prose-invert max-w-none">
+                        <pre className="whitespace-pre-wrap text-sm bg-secondary p-4 rounded-lg leading-relaxed">
                           {result[platform as keyof SocialContent]}
                         </pre>
                       </div>

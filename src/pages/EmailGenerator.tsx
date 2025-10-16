@@ -8,12 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Copy, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useTracking } from "@/hooks/useTracking";
+import { typewriterEffect } from "@/utils/typewriter";
 
 const EmailGenerator = () => {
   const navigate = useNavigate();
+  const { trackAction } = useTracking();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [formData, setFormData] = useState({
     product: "",
     objective: "",
@@ -45,7 +49,11 @@ const EmailGenerator = () => {
 
       if (error) throw error;
 
-      setResult(data.email);
+      setIsTyping(true);
+      await typewriterEffect(data.email, (partial) => {
+        setResult(partial);
+      }, 30);
+      setIsTyping(false);
       
       const history = JSON.parse(localStorage.getItem("max_email_history") || "[]");
       history.unshift({
@@ -55,6 +63,7 @@ const EmailGenerator = () => {
       });
       localStorage.setItem("max_email_history", JSON.stringify(history.slice(0, 50)));
       
+      trackAction("emails_generated");
       toast.success("Email généré avec succès !");
     } catch (error: any) {
       console.error("Erreur:", error);
@@ -183,9 +192,10 @@ const EmailGenerator = () => {
                       )}
                     </Button>
                   </div>
-                  <div className="prose prose-invert max-w-none">
-                    <pre className="whitespace-pre-wrap text-sm bg-secondary p-4 rounded-lg">
+                   <div className="prose prose-invert max-w-none">
+                    <pre className="whitespace-pre-wrap text-sm bg-secondary p-4 rounded-lg leading-relaxed">
                       {result}
+                      {isTyping && <span className="animate-pulse">▊</span>}
                     </pre>
                   </div>
                 </div>

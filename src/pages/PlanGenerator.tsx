@@ -8,12 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Copy, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useTracking } from "@/hooks/useTracking";
+import { typewriterEffect } from "@/utils/typewriter";
 
 const PlanGenerator = () => {
   const navigate = useNavigate();
+  const { trackAction } = useTracking();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [formData, setFormData] = useState({
     business: "",
     objective: "",
@@ -46,7 +50,11 @@ const PlanGenerator = () => {
 
       if (error) throw error;
 
-      setResult(data.plan);
+      setIsTyping(true);
+      await typewriterEffect(data.plan, (partial) => {
+        setResult(partial);
+      }, 30);
+      setIsTyping(false);
       
       const history = JSON.parse(localStorage.getItem("max_plan_history") || "[]");
       history.unshift({
@@ -56,6 +64,7 @@ const PlanGenerator = () => {
       });
       localStorage.setItem("max_plan_history", JSON.stringify(history.slice(0, 50)));
       
+      trackAction("plans_generated");
       toast.success("Plan marketing généré avec succès !");
     } catch (error: any) {
       console.error("Erreur:", error);
@@ -195,9 +204,10 @@ const PlanGenerator = () => {
                       )}
                     </Button>
                   </div>
-                  <div className="prose prose-invert max-w-none">
-                    <pre className="whitespace-pre-wrap text-sm bg-secondary p-4 rounded-lg max-h-[600px] overflow-y-auto">
+                   <div className="prose prose-invert max-w-none">
+                    <pre className="whitespace-pre-wrap text-sm bg-secondary p-4 rounded-lg max-h-[600px] overflow-y-auto leading-relaxed">
                       {result}
+                      {isTyping && <span className="animate-pulse">▊</span>}
                     </pre>
                   </div>
                 </div>

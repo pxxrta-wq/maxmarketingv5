@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Mail, TrendingUp, Share2, Zap, Target, Brain } from "lucide-react";
+import { Sparkles, Mail, TrendingUp, Share2, Zap, Target, Brain, Rocket, Users, Crown } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ const Index = () => {
           <div className="max-w-4xl mx-auto space-y-8">
             <h1 className="text-5xl md:text-6xl font-bold leading-tight">
               Votre stratège marketing{" "}
-              <span className="gradient-primary bg-clip-text text-transparent">personnel</span>,
+              <span className="text-white">personnel</span>,
               <br />
               alimenté par l'IA
             </h1>
@@ -63,8 +63,8 @@ const Index = () => {
         </section>
 
         <section className="container mx-auto px-6 py-20">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-card rounded-2xl p-8 border border-border shadow-card">
+          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-8">
+            <div className="bg-card rounded-2xl p-8 border border-border shadow-card hover:shadow-elegant transition-smooth">
               <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center mb-6">
                 <Mail className="w-7 h-7 text-white" />
               </div>
@@ -75,7 +75,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="bg-card rounded-2xl p-8 border border-border shadow-card">
+            <div className="bg-card rounded-2xl p-8 border border-border shadow-card hover:shadow-elegant transition-smooth">
               <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center mb-6">
                 <TrendingUp className="w-7 h-7 text-white" />
               </div>
@@ -86,7 +86,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="bg-card rounded-2xl p-8 border border-border shadow-card">
+            <div className="bg-card rounded-2xl p-8 border border-border shadow-card hover:shadow-elegant transition-smooth">
               <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center mb-6">
                 <Share2 className="w-7 h-7 text-white" />
               </div>
@@ -94,6 +94,38 @@ const Index = () => {
               <p className="text-muted-foreground">
                 Générez du contenu optimisé pour LinkedIn, Instagram, TikTok et Facebook en un
                 seul clic.
+              </p>
+            </div>
+
+            <div className="bg-card rounded-2xl p-8 border border-border shadow-card hover:shadow-elegant transition-smooth relative overflow-hidden">
+              <div className="absolute top-4 right-4">
+                <Crown className="w-5 h-5 text-primary" />
+              </div>
+              <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center mb-6">
+                <Rocket className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 flex items-center gap-2">
+                Pitch Creator
+                <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">Premium</span>
+              </h3>
+              <p className="text-muted-foreground">
+                Créez des pitchs professionnels pour investisseurs, ventes et partenariats en quelques minutes.
+              </p>
+            </div>
+
+            <div className="bg-card rounded-2xl p-8 border border-border shadow-card hover:shadow-elegant transition-smooth relative overflow-hidden">
+              <div className="absolute top-4 right-4">
+                <Crown className="w-5 h-5 text-primary" />
+              </div>
+              <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center mb-6">
+                <Users className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 flex items-center gap-2">
+                Avatar Client
+                <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">Premium</span>
+              </h3>
+              <p className="text-muted-foreground">
+                Générez des profils clients idéaux détaillés avec données démographiques et psychographiques.
               </p>
             </div>
           </div>
