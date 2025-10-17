@@ -1,17 +1,24 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { Sparkles } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [isRecovery, setIsRecovery] = useState(false);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("max_current_user");
-    if (currentUser) {
+    if (currentUser && searchParams.get("mode") !== "recovery") {
       navigate("/dashboard");
     }
-  }, [navigate]);
+
+    // Handle password recovery mode
+    if (searchParams.get("mode") === "recovery") {
+      setIsRecovery(true);
+    }
+  }, [navigate, searchParams]);
 
   const handleSuccess = () => {
     navigate("/dashboard");
@@ -32,6 +39,16 @@ const Auth = () => {
 
         <div className="bg-card rounded-2xl shadow-card p-8 border border-border">
           <AuthForm onSuccess={handleSuccess} />
+          
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => navigate("/reset-password")}
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              Mot de passe oublié ?
+            </button>
+          </div>
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">

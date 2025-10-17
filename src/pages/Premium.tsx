@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,6 +19,8 @@ import {
   Cloud,
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { usePremium } from "@/hooks/usePremium";
 
 const premiumFeatures = [
   { icon: Zap, text: "Générations IA illimitées" },
@@ -37,20 +39,36 @@ const premiumFeatures = [
 
 export default function Premium() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const isPremium = localStorage.getItem("max_premium") === "true";
+  const { isPremium, refresh } = usePremium();
+
+  useEffect(() => {
+    // Check if user just completed payment
+    if (searchParams.get("premium") === "true") {
+      toast.success("🎉 Bienvenue dans Max Marketing Premium !", {
+        description: "Toutes les fonctionnalités sont maintenant débloquées !",
+      });
+      refresh();
+    }
+  }, [searchParams, refresh]);
 
   const handleUpgrade = async () => {
     setLoading(true);
+    
     try {
-      // Simulation paiement Stripe - À remplacer par vraie intégration
-      setTimeout(() => {
-        localStorage.setItem("max_premium", "true");
-        toast.success("🎉 Bienvenue dans Max Marketing Premium !");
-        navigate("/dashboard");
-      }, 2000);
+      const { data, error } = await supabase.functions.invoke("create-checkout");
+      
+      if (error) throw error;
+      
+      if (data?.url) {
+        // Open Stripe checkout in new tab
+        window.open(data.url, "_blank");
+        toast.success("Redirection vers le paiement sécurisé...");
+      }
     } catch (error) {
-      toast.error("Erreur lors du paiement");
+      console.error("Error creating checkout:", error);
+      toast.error("Erreur lors de la création de la session de paiement");
     } finally {
       setLoading(false);
     }

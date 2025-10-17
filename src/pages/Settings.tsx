@@ -4,17 +4,20 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { User, Trash2, Palette } from "lucide-react";
+import { User, Trash2, Download, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { ThemeSelector } from "@/components/ui/ThemeSelector";
 import { useTracking } from "@/hooks/useTracking";
 import { usePremium } from "@/hooks/usePremium";
+import { supabase } from "@/integrations/supabase/client";
 
 const Settings = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const { stats } = useTracking();
-  const isPremium = usePremium();
+  const { isPremium } = usePremium();
+  const [exportLoading, setExportLoading] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("max_current_user");
@@ -32,6 +35,65 @@ const Settings = () => {
       localStorage.removeItem("max_social_history");
       localStorage.removeItem("max_chat_history");
       toast.success("Historique supprimé avec succès");
+    }
+  };
+
+  const handleExportData = async () => {
+    setExportLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("export-user-data");
+      
+      if (error) throw error;
+      
+      // Add localStorage data
+      const localData = {
+        max_premium: localStorage.getItem("max_premium"),
+        max_theme: localStorage.getItem("max_theme"),
+        max_tracking: localStorage.getItem("max_tracking"),
+        max_email_history: localStorage.getItem("max_email_history"),
+        max_plan_history: localStorage.getItem("max_plan_history"),
+        max_social_history: localStorage.getItem("max_social_history"),
+        max_chat_history: localStorage.getItem("max_chat_history"),
+      };
+      
+      const fullExport = {
+        ...data,
+        local_storage_data: localData,
+      };
+      
+      const blob = new Blob([JSON.stringify(fullExport, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `max-marketing-data-${new Date().toISOString()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      toast.success("✅ Vos données ont été téléchargées");
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      toast.error("Erreur lors de l'export des données");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, "_blank");
+        toast.success("Redirection vers la gestion de l'abonnement...");
+      }
+    } catch (error) {
+      console.error("Error opening portal:", error);
+      toast.error("Erreur lors de l'ouverture du portail");
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -91,8 +153,46 @@ const Settings = () => {
                   Supprimer l'historique
                 </Button>
               </div>
+
+              <div className="pt-4 border-t border-border">
+                <Label>Export de données (RGPD)</Label>
+                <p className="text-sm text-muted-foreground mt-1 mb-3">
+                  Téléchargez toutes vos données personnelles au format JSON
+                </p>
+                <Button
+                  onClick={handleExportData}
+                  variant="outline"
+                  className="gap-2"
+                  disabled={exportLoading}
+                >
+                  <Download className="w-4 h-4" />
+                  {exportLoading ? "Téléchargement..." : "📥 Télécharger mes données"}
+                </Button>
+              </div>
             </div>
           </Card>
+
+          {isPremium && (
+            <Card className="p-6 bg-card border-border">
+              <h3 className="text-lg font-semibold mb-4">Gestion de l'abonnement Premium</h3>
+              <div className="space-y-4">
+                <div>
+                  <Label>Portail client</Label>
+                  <p className="text-sm text-muted-foreground mt-1 mb-3">
+                    Gérez votre abonnement, moyen de paiement et factures
+                  </p>
+                  <Button
+                    onClick={handleManageSubscription}
+                    className="gap-2 gradient-primary"
+                    disabled={portalLoading}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    {portalLoading ? "Chargement..." : "Gérer mon abonnement"}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
 
           {isPremium && (
             <Card className="p-6 bg-card border-border">
