@@ -102,10 +102,52 @@ export const ThemeSelector = () => {
     if (!theme) return;
 
     const root = document.documentElement;
+    const isLightTheme = theme.colors.background.startsWith("0 0% 100");
+    
+    // Main colors
     root.style.setProperty("--background", theme.colors.background);
     root.style.setProperty("--foreground", theme.colors.foreground);
     root.style.setProperty("--primary", theme.colors.primary);
     root.style.setProperty("--accent", theme.colors.accent);
+    
+    // Card colors based on theme
+    if (isLightTheme) {
+      root.style.setProperty("--card", "0 0% 98%");
+      root.style.setProperty("--card-foreground", "222 47% 11%");
+      root.style.setProperty("--secondary", "210 40% 96%");
+      root.style.setProperty("--secondary-foreground", "222 47% 11%");
+      root.style.setProperty("--muted", "210 40% 96%");
+      root.style.setProperty("--muted-foreground", "215 16% 47%");
+      root.style.setProperty("--border", "214 32% 91%");
+      root.style.setProperty("--input", "214 32% 91%");
+      
+      // Sidebar for light themes
+      root.style.setProperty("--sidebar-background", "0 0% 98%");
+      root.style.setProperty("--sidebar-foreground", "222 47% 11%");
+      root.style.setProperty("--sidebar-primary", theme.colors.primary);
+      root.style.setProperty("--sidebar-primary-foreground", "0 0% 100%");
+      root.style.setProperty("--sidebar-accent", "210 40% 96%");
+      root.style.setProperty("--sidebar-accent-foreground", "222 47% 11%");
+      root.style.setProperty("--sidebar-border", "214 32% 91%");
+    } else {
+      root.style.setProperty("--card", "217 33% 11%");
+      root.style.setProperty("--card-foreground", "0 0% 98%");
+      root.style.setProperty("--secondary", "217 33% 15%");
+      root.style.setProperty("--secondary-foreground", "0 0% 98%");
+      root.style.setProperty("--muted", "217 33% 15%");
+      root.style.setProperty("--muted-foreground", "0 0% 65%");
+      root.style.setProperty("--border", "217 33% 18%");
+      root.style.setProperty("--input", "217 33% 18%");
+      
+      // Sidebar for dark themes
+      root.style.setProperty("--sidebar-background", "217 33% 10%");
+      root.style.setProperty("--sidebar-foreground", "0 0% 90%");
+      root.style.setProperty("--sidebar-primary", theme.colors.primary);
+      root.style.setProperty("--sidebar-primary-foreground", "0 0% 100%");
+      root.style.setProperty("--sidebar-accent", "217 33% 15%");
+      root.style.setProperty("--sidebar-accent-foreground", "0 0% 98%");
+      root.style.setProperty("--sidebar-border", "217 33% 16%");
+    }
     
     // Update gradient with new primary color
     root.style.setProperty(
