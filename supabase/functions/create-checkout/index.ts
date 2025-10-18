@@ -18,34 +18,39 @@ serve(async (req) => {
   );
 
   try {
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("No authorization header provided");
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
-      apiVersion: "2025-08-27.basil" 
-    });
+    const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
+    const priceId = Deno.env.get("STRIPE_PRICE_ID");
+    if (!stripeSecret) throw new Error("STRIPE_SECRET_KEY is not set");
+    if (!priceId) throw new Error("STRIPE_PRICE_ID is not set");
+
+    const stripe = new Stripe(stripeSecret, { apiVersion: "2025-08-27.basil" });
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-    }
+    const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
 
+    const origin = req.headers.get("origin") || "http://localhost:5173";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price: "price_1SJKIPGU0T44bY08XIb3paGw",
-          quantity: 1,
-        },
-      ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/payment-success`,
-      cancel_url: `${req.headers.get("origin")}/payment-cancel`,
+      line_items: [{ price: priceId, quantity: 1 }],
+      allow_promotion_codes: true,
+      subscription_data: {
+        trial_period_days: 7,
+        metadata: { user_id: user.id },
+      },
+      success_url: `${origin}/payment-success`,
+      cancel_url: `${origin}/payment-cancel`,
+      // Apple Pay and Google Pay are supported automatically under card wallets
+      // when enabled in the Stripe Dashboard and domain is verified.
+      customer_update: { address: "auto" },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

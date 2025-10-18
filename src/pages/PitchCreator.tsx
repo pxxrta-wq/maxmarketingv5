@@ -14,7 +14,7 @@ import { usePremium } from "@/hooks/usePremium";
 
 export default function PitchCreator() {
   const { trackAction } = useTracking();
-  const isPremium = usePremium();
+  const { isPremium } = usePremium();
   const [product, setProduct] = useState("");
   const [problem, setProblem] = useState("");
   const [market, setMarket] = useState("");

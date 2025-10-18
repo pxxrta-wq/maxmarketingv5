@@ -88,7 +88,7 @@ export const themes: Theme[] = [
 ];
 
 export const ThemeSelector = () => {
-  const isPremium = usePremium();
+  const { isPremium } = usePremium();
   const [currentTheme, setCurrentTheme] = useState("dark-orange");
 
   useEffect(() => {

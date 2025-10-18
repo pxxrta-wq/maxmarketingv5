@@ -74,6 +74,23 @@ export default function Premium() {
     }
   };
 
+  const handleUpgradeWithPayPal = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-paypal-subscription");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+        toast.success("Redirection vers PayPal...");
+      }
+    } catch (error) {
+      console.error("Error creating PayPal subscription:", error);
+      toast.error("Erreur lors de la redirection PayPal");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-background">
       <Sidebar />
@@ -130,6 +147,19 @@ export default function Premium() {
               )}
             </div>
           </Card>
+
+          {!isPremium && (
+            <Card className="p-6">
+              <div className="flex items-center justify-center gap-3">
+                <Button onClick={handleUpgrade} disabled={loading} className="gradient-primary text-white font-bold">
+                  Payer par carte (Stripe / Apple Pay)
+                </Button>
+                <Button onClick={handleUpgradeWithPayPal} disabled={loading} variant="outline">
+                  Payer avec PayPal
+                </Button>
+              </div>
+            </Card>
+          )}
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

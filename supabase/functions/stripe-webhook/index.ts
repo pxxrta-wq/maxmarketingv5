@@ -18,6 +18,27 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
+async function sendEmail(to: string, subject: string, html: string) {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  const from = Deno.env.get("EMAIL_FROM") || "noreply@maxmarketing.com";
+  if (!apiKey) {
+    logStep("RESEND_API_KEY missing - skipping email", { to, subject });
+    return;
+  }
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ from, to, subject, html }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    logStep("ERROR sending email", { status: res.status, text });
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -109,6 +130,13 @@ serve(async (req) => {
         });
 
         logStep("Transaction recorded");
+
+        // Send welcome email
+        await sendEmail(
+          customerEmail,
+          "Bienvenue dans Max Marketing Premium ✨",
+          `<h2>Bienvenue !</h2><p>Votre abonnement Premium est actif. Vous avez maintenant accès à toutes les fonctionnalités.</p><p>Accédez à votre tableau de bord: <a href="${(session.success_url ?? '').split('?')[0] || 'https://app.maxmarketing.com/dashboard'}">Ouvrir Max Marketing</a></p>`
+        );
         break;
       }
 
@@ -143,6 +171,23 @@ serve(async (req) => {
           .eq("stripe_subscription_id", subscription.id);
 
         if (error) logStep("ERROR canceling subscription", { error });
+        // Attempt to send cancellation email
+        try {
+          const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
+          if (customerId) {
+            const customer = await stripe.customers.retrieve(customerId);
+            const email = (customer as any)?.email as string | undefined;
+            if (email) {
+              await sendEmail(
+                email,
+                "Abonnement annulé - Max Marketing",
+                `<p>Votre abonnement a été annulé. Vous conservez l'accès jusqu'au ${(subscription.current_period_end ? new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR') : 'fin de période')}.</p>`
+              );
+            }
+          }
+        } catch (e) {
+          logStep("ERROR sending cancellation email", { error: e instanceof Error ? e.message : String(e) });
+        }
         break;
       }
 
@@ -169,6 +214,15 @@ serve(async (req) => {
             payment_method: "card",
             metadata: { invoice_id: invoice.id }
           });
+          // Email receipt if customer email available
+          const email = invoice.customer_email || invoice.customer_address?.email;
+          if (email) {
+            await sendEmail(
+              email,
+              "Paiement reçu - Max Marketing Premium",
+              `<p>Merci pour votre paiement de ${(invoice.amount_paid / 100).toFixed(2)} ${invoice.currency?.toUpperCase()}.</p><p>Votre abonnement reste actif.</p>`
+            );
+          }
         }
         break;
       }
@@ -199,6 +253,14 @@ serve(async (req) => {
             status: "failed",
             metadata: { invoice_id: invoice.id }
           });
+          const email = invoice.customer_email || invoice.customer_address?.email;
+          if (email) {
+            await sendEmail(
+              email,
+              "Échec de paiement - Max Marketing Premium",
+              `<p>Le paiement de ${(invoice.amount_due / 100).toFixed(2)} ${invoice.currency?.toUpperCase()} a échoué. Veuillez mettre à jour votre moyen de paiement depuis le portail client Stripe.</p>`
+            );
+          }
         }
         break;
       }
