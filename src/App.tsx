@@ -14,6 +14,8 @@ import AvatarCreator from "./pages/AvatarCreator";
 import Premium from "./pages/Premium";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ResetPassword from "./pages/ResetPassword";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancel from "./pages/PaymentCancel";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -38,6 +40,8 @@ const App = () => (
           <Route path="/premium" element={<Premium />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/payment-cancel" element={<PaymentCancel />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { PremiumGuard } from "@/components/premium/PremiumGuard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -73,8 +74,9 @@ export default function PitchCreator() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <Sidebar />
+    <PremiumGuard feature="Le Pitch Creator">
+      <div className="flex min-h-screen w-full bg-background">
+        <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
           <div className="flex items-center gap-3">
@@ -199,6 +201,7 @@ export default function PitchCreator() {
           </div>
         </div>
       </main>
-    </div>
+      </div>
+    </PremiumGuard>
   );
 }

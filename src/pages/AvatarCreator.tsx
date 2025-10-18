@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { PremiumGuard } from "@/components/premium/PremiumGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,8 +73,9 @@ export default function AvatarCreator() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <Sidebar />
+    <PremiumGuard feature="L'Avatar Client">
+      <div className="flex min-h-screen w-full bg-background">
+        <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
           <div className="flex items-center gap-3">
@@ -197,6 +199,7 @@ export default function AvatarCreator() {
           </div>
         </div>
       </main>
-    </div>
+      </div>
+    </PremiumGuard>
   );
 }
