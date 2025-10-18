@@ -43,26 +43,44 @@ serve(async (req) => {
       throw checkError;
     }
 
-    // Get subscription details if active
-    let subscriptionEnd = null;
-    if (hasActive) {
-      const { data: subscription } = await supabaseClient
+    // Consider trialing as active for access purposes
+    let subscribed = !!hasActive;
+    let subscriptionEnd: string | null = null;
+
+    if (!subscribed) {
+      const { data: trialSub } = await supabaseClient
+        .from('subscriptions')
+        .select('status,current_period_end')
+        .eq('user_id', user.id)
+        .eq('status', 'trialing')
+        .gt('current_period_end', new Date().toISOString())
+        .maybeSingle();
+
+      if (trialSub) {
+        subscribed = true;
+        subscriptionEnd = trialSub.current_period_end as any;
+        logStep('Trialing subscription detected', { endDate: subscriptionEnd });
+      }
+    }
+
+    if (!subscriptionEnd && subscribed) {
+      const { data: activeSub } = await supabaseClient
         .from('subscriptions')
         .select('current_period_end')
         .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
-      
-      if (subscription) {
-        subscriptionEnd = subscription.current_period_end;
-        logStep("Active subscription found", { endDate: subscriptionEnd });
-      }
-    } else {
-      logStep("No active subscription found");
+        .in('status', ['active', 'trialing'])
+        .order('current_period_end', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      subscriptionEnd = activeSub?.current_period_end ?? null;
+    }
+
+    if (!subscribed) {
+      logStep("No active or trialing subscription found");
     }
 
     return new Response(JSON.stringify({
-      subscribed: hasActive,
+      subscribed,
       subscription_end: subscriptionEnd
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

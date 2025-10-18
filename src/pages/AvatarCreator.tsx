@@ -14,7 +14,7 @@ import { usePremium } from "@/hooks/usePremium";
 
 export default function AvatarCreator() {
   const { trackAction } = useTracking();
-  const isPremium = usePremium();
+  const { isPremium } = usePremium();
   const [business, setBusiness] = useState("");
   const [product, setProduct] = useState("");
   const [goal, setGoal] = useState("");
