@@ -25,10 +25,15 @@ const Dashboard = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const currentUser = localStorage.getItem("max_current_user");
-    if (!currentUser) {
-      navigate("/auth");
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+    };
+
+    checkAuth();
 
     const savedMessages = localStorage.getItem("max_chat_history");
     if (savedMessages) {

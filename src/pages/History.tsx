@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, TrendingUp, Share2, MessageSquare } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const History = () => {
   const navigate = useNavigate();
@@ -15,10 +16,13 @@ const History = () => {
   });
 
   useEffect(() => {
-    const currentUser = localStorage.getItem("max_current_user");
-    if (!currentUser) {
-      navigate("/auth");
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+      }
+    };
+    checkAuth();
 
     const emailHistory = JSON.parse(localStorage.getItem("max_email_history") || "[]");
     const planHistory = JSON.parse(localStorage.getItem("max_plan_history") || "[]");

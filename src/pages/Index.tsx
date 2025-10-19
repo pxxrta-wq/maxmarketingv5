@@ -2,15 +2,19 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Mail, TrendingUp, Share2, Zap, Target, Brain, Rocket, Users, Crown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const currentUser = localStorage.getItem("max_current_user");
-    if (currentUser) {
-      navigate("/dashboard");
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/dashboard");
+      }
+    };
+    checkAuth();
   }, [navigate]);
 
   return (

@@ -20,12 +20,15 @@ const Settings = () => {
   const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
-    const currentUser = localStorage.getItem("max_current_user");
-    if (!currentUser) {
-      navigate("/auth");
-    } else {
-      setUser(JSON.parse(currentUser));
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+    };
+    checkAuth();
   }, [navigate]);
 
   const handleClearHistory = () => {

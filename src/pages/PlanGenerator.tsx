@@ -28,10 +28,13 @@ const PlanGenerator = () => {
   });
 
   useEffect(() => {
-    const currentUser = localStorage.getItem("max_current_user");
-    if (!currentUser) {
-      navigate("/auth");
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+      }
+    };
+    checkAuth();
   }, [navigate]);
 
   const handleGenerate = async () => {

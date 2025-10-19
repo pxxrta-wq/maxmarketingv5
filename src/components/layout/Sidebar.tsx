@@ -3,6 +3,8 @@ import { MessageSquare, Mail, TrendingUp, Share2, History, Settings, LogOut, Spa
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { usePremium } from "@/hooks/usePremium";
 
 const navItems = [
   { to: "/dashboard", icon: MessageSquare, label: "Chat Assistant" },
@@ -16,12 +18,17 @@ const navItems = [
 ];
 
 export const Sidebar = () => {
-  const isPremium = localStorage.getItem("max_premium") === "true";
+  const { isPremium } = usePremium();
 
-  const handleLogout = () => {
-    localStorage.removeItem("max_current_user");
-    toast.success("Déconnexion réussie");
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Déconnexion réussie");
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Erreur logout:", error);
+      toast.error("Erreur lors de la déconnexion");
+    }
   };
 
   return (

@@ -9,35 +9,28 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const [isRecovery, setIsRecovery] = useState(false);
 
+  const handleSuccess = () => {
+    navigate("/dashboard", { replace: true });
+  };
+
   useEffect(() => {
-    // Vérifier session Supabase
-    const checkSession = async () => {
+    // Handle password recovery mode
+    const mode = searchParams.get("mode");
+    if (mode === "recovery") {
+      setIsRecovery(true);
+      return;
+    }
+
+    // Vérifier session uniquement au montage
+    const checkInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session && searchParams.get("mode") !== "recovery") {
-        navigate("/dashboard");
+      if (session) {
+        navigate("/dashboard", { replace: true });
       }
     };
     
-    checkSession();
-
-    // Handle password recovery mode
-    if (searchParams.get("mode") === "recovery") {
-      setIsRecovery(true);
-    }
-
-    // Écouter les changements d'auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        navigate("/dashboard");
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    checkInitialSession();
   }, [navigate, searchParams]);
-
-  const handleSuccess = () => {
-    navigate("/dashboard");
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
