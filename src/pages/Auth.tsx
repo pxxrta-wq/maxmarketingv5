@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { AuthForm } from "@/components/auth/AuthForm";
+import { SupabaseAuthForm } from "@/components/auth/SupabaseAuthForm";
 import { Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -9,15 +10,29 @@ const Auth = () => {
   const [isRecovery, setIsRecovery] = useState(false);
 
   useEffect(() => {
-    const currentUser = localStorage.getItem("max_current_user");
-    if (currentUser && searchParams.get("mode") !== "recovery") {
-      navigate("/dashboard");
-    }
+    // Vérifier session Supabase
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && searchParams.get("mode") !== "recovery") {
+        navigate("/dashboard");
+      }
+    };
+    
+    checkSession();
 
     // Handle password recovery mode
     if (searchParams.get("mode") === "recovery") {
       setIsRecovery(true);
     }
+
+    // Écouter les changements d'auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigate("/dashboard");
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate, searchParams]);
 
   const handleSuccess = () => {
@@ -38,7 +53,7 @@ const Auth = () => {
         </div>
 
         <div className="bg-card rounded-2xl shadow-card p-8 border border-border">
-          <AuthForm onSuccess={handleSuccess} />
+          <SupabaseAuthForm onSuccess={handleSuccess} />
           
           <div className="mt-6 text-center">
             <button
