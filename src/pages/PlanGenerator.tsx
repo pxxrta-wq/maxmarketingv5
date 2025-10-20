@@ -5,19 +5,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Copy, CheckCircle } from "lucide-react";
+import { Loader2, Copy, CheckCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTracking } from "@/hooks/useTracking";
 import { typewriterEffect } from "@/utils/typewriter";
+import { usePersistence } from "@/hooks/usePersistence";
+import { usePremium } from "@/hooks/usePremium";
+import { Switch } from "@/components/ui/switch";
 
 const PlanGenerator = () => {
   const navigate = useNavigate();
   const { trackAction } = useTracking();
+  const { isPremium } = usePremium();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState("");
   const [copied, setCopied] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [shortVersion, setShortVersion] = useState(false);
+  const [showFullVersion, setShowFullVersion] = useState(false);
   const [formData, setFormData] = useState({
     business: "",
     objective: "",
@@ -26,6 +32,10 @@ const PlanGenerator = () => {
     budget: "",
     channels: "",
   });
+
+  // Persistence for form data and result
+  const { saveData: saveFormData } = usePersistence("max_plan_form", formData);
+  const { saveData: saveResult } = usePersistence("max_plan_result", result);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,10 +55,11 @@ const PlanGenerator = () => {
 
     setIsLoading(true);
     setResult("");
+    setShowFullVersion(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("plan-generator", {
-        body: formData,
+        body: { ...formData, shortVersion },
       });
 
       if (error) throw error;
@@ -56,16 +67,22 @@ const PlanGenerator = () => {
       setIsTyping(true);
       await typewriterEffect(data.plan, (partial) => {
         setResult(partial);
-      }, 30);
+        saveResult(partial);
+      });
       setIsTyping(false);
       
+      // Save to history
       const history = JSON.parse(localStorage.getItem("max_plan_history") || "[]");
       history.unshift({
         ...formData,
         result: data.plan,
+        shortVersion,
         timestamp: new Date().toISOString(),
       });
       localStorage.setItem("max_plan_history", JSON.stringify(history.slice(0, 50)));
+      
+      // Save form data
+      saveFormData(formData);
       
       trackAction("plans_generated");
       toast.success("Plan marketing généré avec succès !");
@@ -165,6 +182,25 @@ const PlanGenerator = () => {
                   />
                 </div>
 
+                <div className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg border border-border">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-primary" />
+                    <div>
+                      <Label htmlFor="shortVersion" className="cursor-pointer font-medium">
+                        Plan court / essentiel
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Version synthétique (600-800 mots)
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    id="shortVersion"
+                    checked={shortVersion}
+                    onCheckedChange={setShortVersion}
+                  />
+                </div>
+
                 <Button
                   onClick={handleGenerate}
                   disabled={isLoading}
@@ -213,6 +249,19 @@ const PlanGenerator = () => {
                       {isTyping && <span className="animate-pulse">▊</span>}
                     </pre>
                   </div>
+                  
+                  {shortVersion && !showFullVersion && isPremium && (
+                    <Button
+                      onClick={() => {
+                        setShortVersion(false);
+                        setShowFullVersion(true);
+                      }}
+                      variant="outline"
+                      className="w-full mt-4"
+                    >
+                      📄 Afficher la version complète (Premium)
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="bg-card rounded-2xl shadow-card p-12 border border-border text-center">

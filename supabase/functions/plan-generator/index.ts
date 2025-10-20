@@ -37,14 +37,43 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Premium required' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { business, objective, target, duration, budget, channels } = await req.json();
+    const { business, objective, target, duration, budget, channels, shortVersion = false } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY non configurée');
     }
 
-    const systemPrompt = `Tu es un stratège marketing senior niveau McKinsey/BCG. Tu crées des plans marketing complets de niveau expert.
+    const systemPrompt = shortVersion 
+      ? `Tu es Max, un consultant marketing expert.
+Crée un plan marketing COURT et ESSENTIEL (maximum 600-800 mots).
+
+Structure simplifiée obligatoire:
+1. 🎯 OBJECTIF GLOBAL (2-3 lignes)
+   - L'objectif principal clairement défini
+
+2. 📊 ANALYSE RAPIDE (3-4 lignes)
+   - Points clés du marché et de la situation
+   - Opportunité principale identifiée
+
+3. 🧭 ACTIONS PRIORITAIRES (3 à 5 actions max)
+   - Action 1: [Description courte + impact]
+   - Action 2: [Description courte + impact]
+   - Action 3: [Description courte + impact]
+   - (etc.)
+
+4. 💰 BUDGET & KPIs CLÉS (3-4 lignes)
+   - Répartition budgétaire essentielle
+   - 3 KPIs principaux à suivre
+
+Ton style:
+- Ultra synthétique et direct
+- Chaque ligne compte
+- Zéro blabla, 100% actionnable
+- Qualité consultant en version condensée
+
+Reste professionnel et impactant malgré la concision.`
+      : `Tu es un stratège marketing senior niveau McKinsey/BCG. Tu crées des plans marketing complets de niveau expert.
 
 Structure obligatoire du plan :
 

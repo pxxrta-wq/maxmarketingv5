@@ -9,6 +9,7 @@ import { Users, Copy, Download, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTracking } from "@/hooks/useTracking";
+import { usePersistence } from "@/hooks/usePersistence";
 import { typewriterEffect } from "@/utils/typewriter";
 import { usePremium } from "@/hooks/usePremium";
 
@@ -21,6 +22,9 @@ export default function AvatarCreator() {
   const [avatar, setAvatar] = useState("");
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+
+  // Persistence
+  const { saveData: saveAvatar } = usePersistence("max_avatar_result", avatar);
 
   const generateAvatar = async () => {
     if (!isPremium) {
@@ -44,7 +48,8 @@ export default function AvatarCreator() {
       setIsTyping(true);
       await typewriterEffect(data.avatar, (partial) => {
         setAvatar(partial);
-      }, 30);
+        saveAvatar(partial);
+      });
       setIsTyping(false);
       
       trackAction("avatars_generated");

@@ -9,6 +9,7 @@ import { Loader2, Copy, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTracking } from "@/hooks/useTracking";
+import { usePersistence } from "@/hooks/usePersistence";
 import { typewriterEffect } from "@/utils/typewriter";
 
 const EmailGenerator = () => {
@@ -25,6 +26,9 @@ const EmailGenerator = () => {
     tone: "",
     offer: "",
   });
+
+  // Persistence
+  const { saveData: saveResult } = usePersistence("max_email_result", result);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -55,7 +59,8 @@ const EmailGenerator = () => {
       setIsTyping(true);
       await typewriterEffect(data.email, (partial) => {
         setResult(partial);
-      }, 30);
+        saveResult(partial);
+      });
       setIsTyping(false);
       
       const history = JSON.parse(localStorage.getItem("max_email_history") || "[]");

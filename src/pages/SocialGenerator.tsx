@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTracking } from "@/hooks/useTracking";
+import { usePersistence } from "@/hooks/usePersistence";
 
 interface SocialContent {
   linkedin: string;
@@ -25,6 +26,9 @@ const SocialGenerator = () => {
   const [result, setResult] = useState<SocialContent | null>(null);
   const [topic, setTopic] = useState("");
   const [copiedPlatform, setCopiedPlatform] = useState<string | null>(null);
+
+  // Persistence
+  const { saveData: saveResult } = usePersistence("max_social_result", result);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -53,6 +57,7 @@ const SocialGenerator = () => {
       if (error) throw error;
 
       setResult(data.content);
+      saveResult(data.content);
       
       const history = JSON.parse(localStorage.getItem("max_social_history") || "[]");
       history.unshift({

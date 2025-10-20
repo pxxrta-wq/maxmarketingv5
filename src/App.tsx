@@ -14,6 +14,7 @@ import AvatarCreator from "./pages/AvatarCreator";
 import Premium from "./pages/Premium";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ResetPassword from "./pages/ResetPassword";
+import UpdatePassword from "./pages/UpdatePassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
 import History from "./pages/History";
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/premium" element={<Premium />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/payment-cancel" element={<PaymentCancel />} />
           <Route path="/history" element={<History />} />

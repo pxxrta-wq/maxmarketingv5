@@ -9,6 +9,7 @@ import { Sparkles, Copy, Download, Rocket } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTracking } from "@/hooks/useTracking";
+import { usePersistence } from "@/hooks/usePersistence";
 import { typewriterEffect } from "@/utils/typewriter";
 import { usePremium } from "@/hooks/usePremium";
 
@@ -22,6 +23,9 @@ export default function PitchCreator() {
   const [pitch, setPitch] = useState("");
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+
+  // Persistence
+  const { saveData: savePitch } = usePersistence("max_pitch_result", pitch);
 
   const generatePitch = async () => {
     if (!isPremium) {
@@ -45,7 +49,8 @@ export default function PitchCreator() {
       setIsTyping(true);
       await typewriterEffect(data.pitch, (partial) => {
         setPitch(partial);
-      }, 30);
+        savePitch(partial);
+      });
       setIsTyping(false);
       
       trackAction("pitch_created");
