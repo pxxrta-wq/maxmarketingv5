@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Max Marketing</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Navigation principale">
+      <div class="brand">Max Marketing</div>
+      <nav>
+        <button data-route="chat">💬 Nouvelle conversation</button>
+        <button data-route="emails">📧 Créer des mails</button>
+        <button data-route="strategies">📱 Stratégies</button>
+        <button data-route="plan">🗓️ Plan marketing</button>
+        <button data-route="stats">📊 Statistiques</button>
+        <button data-route="settings">⚙️ Paramètres</button>
+      </nav>
+      <div class="theme-switcher">
+        <label for="theme">Thème</label>
+        <select id="theme">
+          <option value="dark">Sombre (défaut)</option>
+          <option value="light-orange">Clair Orange</option>
+          <option value="light-green" data-premium="true">Clair Vert (premium)</option>
+          <option value="light-purple" data-premium="true">Clair Violet (premium)</option>
+        </select>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div id="auth-status" aria-live="polite"></div>
+      </header>
+      <section id="view-chat" class="view active" aria-label="Chat">
+        <div id="chat" class="chat-area" aria-live="polite"></div>
+        <form id="chat-form" class="input-bar" autocomplete="off">
+          <input id="chat-input" name="prompt" placeholder="Écrivez votre message…" required />
+          <select id="typewriter-speed" title="Vitesse">
+            <option value="normal" selected>Normal</option>
+            <option value="fast">Rapide</option>
+            <option value="slow">Lent</option>
+          </select>
+          <button type="submit">Envoyer</button>
+        </form>
+      </section>
+
+      <section id="view-emails" class="view" aria-label="Création d'emails">
+        <textarea id="emails-editor" placeholder="Brief email…"></textarea>
+      </section>
+
+      <section id="view-strategies" class="view" aria-label="Stratégies réseaux">
+        <textarea id="strategies-editor" placeholder="Objectifs réseaux…"></textarea>
+      </section>
+
+      <section id="view-plan" class="view" aria-label="Plan marketing">
+        <textarea id="plan-editor" placeholder="Plan marketing…"></textarea>
+      </section>
+
+      <section id="view-stats" class="view" aria-label="Statistiques">
+        <div id="stats" class="stats-grid"></div>
+      </section>
+
+      <section id="view-settings" class="view" aria-label="Paramètres">
+        <div class="settings">
+          <h2>Compte</h2>
+          <form id="login-form">
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="password" name="password" placeholder="Mot de passe" required />
+            <button type="submit">Se connecter</button>
+          </form>
+          <button id="btn-register">Créer un compte</button>
+          <button id="btn-reset">Mot de passe oublié</button>
+          <h2>Abonnement</h2>
+          <button id="btn-upgrade">Passer en Premium</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
