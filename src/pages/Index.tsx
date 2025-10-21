@@ -3,22 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Mail, TrendingUp, Share2, Zap, Target, Brain, Rocket, Users, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
 const Index = () => {
   const navigate = useNavigate();
-
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (session) {
         navigate("/dashboard");
       }
     };
     checkAuth();
   }, [navigate]);
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <nav className="border-b border-border">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -38,7 +38,7 @@ const Index = () => {
           <div className="max-w-4xl mx-auto space-y-8">
             <h1 className="text-5xl md:text-6xl font-bold leading-tight">
               Votre stratège marketing{" "}
-              <span className="text-white">personnel</span>,
+              <span className="text-6xl font-extrabold text-orange-500">PERSONNEL</span>,
               <br />
               alimenté par l'IA
             </h1>
@@ -47,19 +47,11 @@ const Index = () => {
               et du contenu viral pour tous vos réseaux sociaux en quelques secondes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => navigate("/auth")}
-                size="lg"
-                className="gradient-primary shadow-glow text-lg px-8 py-6"
-              >
+              <Button onClick={() => navigate("/auth")} size="lg" className="gradient-primary shadow-glow text-lg px-8 py-6">
                 <Sparkles className="w-5 h-5 mr-2" />
                 Essayer gratuitement
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-lg px-8 py-6"
-              >
+              <Button variant="outline" size="lg" className="text-lg px-8 py-6">
                 Voir la démo
               </Button>
             </div>
@@ -176,11 +168,7 @@ const Index = () => {
             <p className="text-xl text-muted-foreground">
               Rejoignez les marketeurs qui utilisent l'IA pour créer du contenu performant
             </p>
-            <Button
-              onClick={() => navigate("/auth")}
-              size="lg"
-              className="gradient-primary shadow-glow text-lg px-8 py-6"
-            >
+            <Button onClick={() => navigate("/auth")} size="lg" className="gradient-primary shadow-glow text-lg px-8 py-6">
               <Sparkles className="w-5 h-5 mr-2" />
               Commencer maintenant
             </Button>
@@ -191,16 +179,11 @@ const Index = () => {
       <footer className="border-t border-border mt-20">
         <div className="container mx-auto px-6 py-8 text-center text-sm text-muted-foreground">
           <p>© 2024 Max Marketing. Tous droits réservés.</p>
-          <button
-            onClick={() => navigate("/privacy-policy")}
-            className="mt-2 text-primary hover:underline"
-          >
+          <button onClick={() => navigate("/privacy-policy")} className="mt-2 text-primary hover:underline">
             Politique de confidentialité
           </button>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
